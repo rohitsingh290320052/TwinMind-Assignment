@@ -2,14 +2,14 @@ package com.example.twinmind_assignment.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.twinmind_assignment.viewmodel.RecorderViewModel
 import com.example.twinmind_assignment.ui.components.LargeMicButton
 
@@ -37,7 +37,8 @@ fun RecorderScreen(
                     isRecording = state.isRecording,
                     onClick = {
                         if (state.isRecording) {
-                            viewModel.stopRecording(onStopNavigate)
+                            viewModel.stopRecording()
+                            onStopNavigate(0L)   // Navigate immediately to Processing screen
                         } else {
                             viewModel.startRecording()
                         }
@@ -61,4 +62,3 @@ fun RecorderScreen(
         }
     }
 }
-

@@ -1,6 +1,5 @@
 package com.example.twinmind_assignment.data
 
-
 import android.media.MediaRecorder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -21,6 +20,8 @@ class AudioRecorder @Inject constructor(
             setAudioSource(MediaRecorder.AudioSource.MIC)
             setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
             setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+            setAudioEncodingBitRate(128000)
+            setAudioSamplingRate(44100)
             setOutputFile(output)
             prepare()
             start()
@@ -29,7 +30,7 @@ class AudioRecorder @Inject constructor(
 
     suspend fun stopRecording(): String = withContext(Dispatchers.IO) {
         recorder?.apply {
-            stop()
+            try { stop() } catch (e: Exception) { e.printStackTrace() }
             release()
         }
         recorder = null

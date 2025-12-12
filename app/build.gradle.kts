@@ -3,6 +3,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt.plugin)
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.21"
+
+
     kotlin("kapt")
 }
 
@@ -77,5 +80,21 @@ dependencies {
 
     // Hilt
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+    // Material icons
+    implementation("androidx.compose.material:material-icons-extended")
+
+    implementation("com.google.ai.client.generativeai:generativeai:0.6.0")
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+
+
+
+
+
+
 
 }

@@ -1,16 +1,12 @@
 package com.example.twinmind_assignment.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.Button
-import androidx.compose.material3.CardDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.twinmind_assignment.data.TranscriptionCache
 import com.example.twinmind_assignment.viewmodel.SummaryViewModel
 
 @Composable
@@ -19,30 +15,46 @@ fun SummaryScreen(
     viewModel: SummaryViewModel = hiltViewModel(),
     onBack: () -> Unit
 ) {
-    LaunchedEffect(Unit) { viewModel.loadSession(sessionId) }
-
+    val transcript = TranscriptionCache.get(sessionId)
     val state = viewModel.uiState.collectAsState().value
+
+    LaunchedEffect(sessionId) {
+        if (!viewModel.uiState.value.loading && state.summary.isBlank()) {
+            viewModel.generate(transcript)
+        }
+    }
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
 
-        Card(Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(12.dp)) {
-                Text(state.title, style = MaterialTheme.typography.titleLarge)
+        when {
+            state.loading -> {
+                CircularProgressIndicator()
+                Spacer(Modifier.height(16.dp))
+                Text("Generating summary...")
             }
-        }
 
-        Spacer(Modifier.height(12.dp))
+            state.error != null -> {
+                Text("Error: ${state.error}", color = MaterialTheme.colorScheme.error)
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(onClick = { viewModel.generate(transcript) }) {
+                    Text("Retry")
+                }
+            }
 
-        SummaryCard("Summary", state.summary)
-        Spacer(Modifier.height(12.dp))
-        SummaryListCard("Key Points", state.keyPoints)
-        Spacer(Modifier.height(12.dp))
-        SummaryListCard("Action Items", state.actionItems)
+            else -> {
+                SummaryCard("Title", state.title)
+                Spacer(Modifier.height(12.dp))
+                SummaryCard("Summary", state.summary)
+                Spacer(Modifier.height(12.dp))
+                SummaryListCard("Key Points", state.keyPoints)
+                Spacer(Modifier.height(12.dp))
+                SummaryListCard("Action Items", state.actionItems)
+                Spacer(Modifier.height(24.dp))
 
-        Spacer(Modifier.height(24.dp))
-
-        Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
-            Text("Back")
+                Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
+                    Text("Back")
+                }
+            }
         }
     }
 }
@@ -70,4 +82,3 @@ fun SummaryListCard(title: String, items: List<String>) {
         }
     }
 }
-

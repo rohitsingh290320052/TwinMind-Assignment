@@ -5,5 +5,6 @@ data class SummaryUiState(
     val summary: String = "",
     val keyPoints: List<String> = emptyList(),
     val actionItems: List<String> = emptyList(),
-    val isLoading: Boolean = false
+    val loading: Boolean = false,
+    val error: String? = null
 )
