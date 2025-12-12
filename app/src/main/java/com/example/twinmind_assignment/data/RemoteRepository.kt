@@ -83,7 +83,7 @@ class RemoteRepository @Inject constructor(
             ?.firstOrNull()
             ?.text ?: """{"title":"","summary":"","keyPoints":[],"actionItems":[]}"""
 
-        // Clean stray markdown fences if Gemini sends ```json … ```
+
         val cleaned = jsonString
             .replace("```json", "")
             .replace("```", "")
@@ -96,7 +96,7 @@ class RemoteRepository @Inject constructor(
         println("JSON PARSED OK => $parsedTest")
 
 
-        // ✨ Parse into your SummaryResult object
+
         return@withContext Json.decodeFromString<SummaryResult>(cleaned)
 
 

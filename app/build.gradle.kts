@@ -10,20 +10,26 @@ plugins {
 }
 
 android {
-    namespace = "com.voiceapp"
+    namespace = "com.example.twinmind_assignment"
     compileSdk = 35
 
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
+
     defaultConfig {
-        applicationId = "com.voiceapp"
+        applicationId = "com.example.twinmind_assignment"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+
+        val apiKey = project.findProperty("GEMINI_API_KEY") ?: ""
+        buildConfigField("String", "GEMINI_API_KEY", "\"$apiKey\"")
+
     }
 
-    buildFeatures {
-        compose = true
-    }
 
     composeOptions {
         kotlinCompilerExtensionVersion = "1.7.0"

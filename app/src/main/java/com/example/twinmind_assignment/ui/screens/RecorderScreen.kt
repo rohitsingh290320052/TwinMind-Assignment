@@ -12,6 +12,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.twinmind_assignment.viewmodel.RecorderViewModel
 import com.example.twinmind_assignment.ui.components.LargeMicButton
+import com.example.twinmind_assignment.ui.components.PermissionGate
+import com.example.twinmind_assignment.ui.components.PermissionRationale
 
 @Composable
 fun RecorderScreen(
@@ -19,44 +21,56 @@ fun RecorderScreen(
     onStopNavigate: (Long) -> Unit,
     onCancel: () -> Unit
 ) {
-    val state = viewModel.uiState.collectAsState().value
+    PermissionGate(
+        permission = android.Manifest.permission.RECORD_AUDIO,
+        rationale = {
+            PermissionRationale(
+                onRequest = it,
+                onCancel = onCancel
+            )
+        }
+    )
+    {
 
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
+        val state = viewModel.uiState.collectAsState().value
 
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Spacer(Modifier.height(8.dp))
-                Text(text = state.status, style = MaterialTheme.typography.titleMedium)
-                Spacer(Modifier.height(24.dp))
-
-                LargeMicButton(
-                    isRecording = state.isRecording,
-                    onClick = {
-                        if (state.isRecording) {
-                            viewModel.stopRecording()
-                            onStopNavigate(0L)   // Navigate immediately to Processing screen
-                        } else {
-                            viewModel.startRecording()
-                        }
-                    }
-                )
-
-                Spacer(Modifier.height(16.dp))
-                Text(text = state.timer, style = MaterialTheme.typography.headlineMedium)
-            }
-
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Button(onClick = onCancel) { Text("Cancel") }
 
-                Button(onClick = { viewModel.togglePause() }) {
-                    Text(if (state.isRecording) "Pause" else "Resume")
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(text = state.status, style = MaterialTheme.typography.titleMedium)
+                    Spacer(Modifier.height(24.dp))
+
+                    LargeMicButton(
+                        isRecording = state.isRecording,
+                        onClick = {
+                            if (state.isRecording) {
+                                viewModel.stopRecording()
+                                onStopNavigate(0L)   // Navigate immediately to Processing screen
+                            } else {
+                                viewModel.startRecording()
+                            }
+                        }
+                    )
+
+                    Spacer(Modifier.height(16.dp))
+                    Text(text = state.timer, style = MaterialTheme.typography.headlineMedium)
+                }
+
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Button(onClick = onCancel) { Text("Cancel") }
+
+                    Button(onClick = { viewModel.togglePause() }) {
+                        Text(if (state.isRecording) "Pause" else "Resume")
+                    }
                 }
             }
         }

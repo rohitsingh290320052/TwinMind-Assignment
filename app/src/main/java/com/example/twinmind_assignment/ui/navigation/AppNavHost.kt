@@ -27,9 +27,9 @@ fun AppNavHost() {
 
         navigation(route = Routes.RECORD_FLOW, startDestination = Routes.RECORDER) {
 
-            // -----------------------
+
             // RECORDER SCREEN
-            // -----------------------
+
             composable(Routes.RECORDER) {
 
                 // FIX → remember BackStackEntry
@@ -43,12 +43,12 @@ fun AppNavHost() {
                 )
             }
 
-            // -----------------------
+
             // PROCESSING SCREEN
-            // -----------------------
+
             composable(Routes.PROCESSING) {
 
-                // FIX → remember BackStackEntry
+
                 val parentEntry = remember { nav.getBackStackEntry(Routes.RECORD_FLOW) }
                 val vm: RecorderViewModel = hiltViewModel(parentEntry)
 
@@ -60,9 +60,9 @@ fun AppNavHost() {
                 )
             }
 
-            // -----------------------
+
             // TRANSCRIPT SCREEN
-            // -----------------------
+
             composable(
                 route = Routes.TRANSCRIPT_ROUTE,
                 arguments = listOf(
@@ -81,9 +81,9 @@ fun AppNavHost() {
                 )
             }
 
-            // -----------------------
+
             // SUMMARY SCREEN
-            // -----------------------
+
             composable(Routes.SUMMARY_ROUTE) { backStack ->
                 val sessionId = backStack.arguments?.getString("sessionId")?.toLongOrNull() ?: -1L
 

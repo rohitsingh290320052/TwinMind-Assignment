@@ -13,3 +13,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+**/GeminiConstants.kt
+app/src/main/assets/keys.properties

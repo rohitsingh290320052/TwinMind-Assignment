@@ -22,7 +22,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Theme() {
     Theme {
-        // entrypoint for nav + screens
         AppNavHost()
     }
 }
