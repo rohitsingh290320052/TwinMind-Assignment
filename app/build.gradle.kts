@@ -26,6 +26,22 @@ android {
         kotlinCompilerExtensionVersion = "1.7.0"
     }
 
+    // 🔥 FIX MATERIAL3 + JVM COMPATIBILITY
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(17))
+        }
+    }
+
     packaging {
         resources.excludes.add("META-INF/*")
     }
