@@ -1,13 +1,12 @@
 package com.example.twinmind_assignment.domain
 
-
-import com.example.twinmind_assignment.data.RemoteApi
+import com.example.twinmind_assignment.data.RemoteRepository
 import javax.inject.Inject
 
 class SummaryUseCase @Inject constructor(
-    private val api: RemoteApi
+    private val repo: RemoteRepository
 ) {
     suspend operator fun invoke(text: String): String {
-        return api.generateSummary(text)
+        return repo.generateSummary(text)
     }
 }

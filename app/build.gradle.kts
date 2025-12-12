@@ -74,4 +74,8 @@ dependencies {
     // Retrofit
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
+
+    // Hilt
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
 }

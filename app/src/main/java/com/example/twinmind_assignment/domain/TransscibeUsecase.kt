@@ -1,13 +1,12 @@
 package com.example.twinmind_assignment.domain
 
-
-import com.example.twinmind_assignment.data.RemoteApi
+import com.example.twinmind_assignment.data.RemoteRepository
 import javax.inject.Inject
 
 class TranscribeUseCase @Inject constructor(
-    private val api: RemoteApi
+    private val repo: RemoteRepository
 ) {
     suspend operator fun invoke(filePath: String): String {
-        return api.transcribeAudio(filePath)
+        return repo.transcribeAudio(filePath)
     }
 }

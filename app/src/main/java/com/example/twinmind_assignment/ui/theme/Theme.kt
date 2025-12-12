@@ -1,58 +1,41 @@
 package com.example.twinmind_assignment.ui.theme
 
-import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
+// TwinMind-like colors (Option A)
+private val TwinLightPrimary = Color(0xFFEF4444) // vivid red mic
+private val TwinLightOnPrimary = Color.White
+private val TwinLightBackground = Color(0xFFFFFFFF)
+private val TwinLightSurface = Color(0xFFF8FAFC)
+private val TwinLightOnSurface = Color(0xFF0F172A)
+private val TwinLightSecondary = Color(0xFF3B82F6) // subtle blue accent
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = TwinLightPrimary,
+    onPrimary = TwinLightOnPrimary,
+    secondary = TwinLightSecondary,
+    background = TwinLightBackground,
+    surface = TwinLightSurface,
+    onSurface = TwinLightOnSurface
 )
 
 @Composable
-fun TwinMindAssignmentTheme(
+fun Theme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
+    // We'll keep a light-only TwinMind look because TwinMind is light focused
     MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
+        colorScheme = LightColorScheme,
+        typography = Typography(),
+        shapes = Shapes(
+            small = androidx.compose.foundation.shape.RoundedCornerShape(8),
+            medium = androidx.compose.foundation.shape.RoundedCornerShape(14),
+            large = androidx.compose.foundation.shape.RoundedCornerShape(20)
+        ),
         content = content
     )
 }
