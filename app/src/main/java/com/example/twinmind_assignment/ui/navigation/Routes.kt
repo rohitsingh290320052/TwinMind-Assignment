@@ -12,14 +12,14 @@ object Routes {
     const val RECORDER = "recorder"
     const val PROCESSING = "processing"
 
-    // Transcript now takes sessionId + encoded text
-    const val TRANSCRIPT_ROUTE = "transcript/{sessionId}/{text}"
+    // Transcript now takes sessionId
     const val SUMMARY_ROUTE = "summary/{sessionId}"
 
-    fun transcript(sessionId: Long, text: String): String {
-        val encoded = URLEncoder.encode(text, "UTF-8")
-        return "transcript/$sessionId/$encoded"
-    }
+    const val TRANSCRIPT_ROUTE = "transcript/{sessionId}"
+
+    fun transcript(sessionId: Long) =
+        "transcript/$sessionId"
+
 
     fun summary(id: Long) = "summary/$id"
 

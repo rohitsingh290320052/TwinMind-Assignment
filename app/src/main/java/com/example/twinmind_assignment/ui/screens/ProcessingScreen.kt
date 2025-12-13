@@ -13,11 +13,11 @@ import com.example.twinmind_assignment.viewmodel.RecorderViewModel
 @Composable
 fun ProcessingScreen(
     viewModel: RecorderViewModel,
-    onDone: (Long, String) -> Unit
+    onDone: (Long) -> Unit
 ) {
-    LaunchedEffect(true) {
-        viewModel.processingDone.collect { result ->
-            onDone(result.sessionId, result.transcription)
+    LaunchedEffect(Unit) {
+        viewModel.processingDone.collect { sessionId ->
+            onDone(sessionId)
         }
     }
 
@@ -28,11 +28,8 @@ fun ProcessingScreen(
     ) {
         CircularProgressIndicator()
         Spacer(Modifier.height(16.dp))
-        Text("Processing your memory...", style = MaterialTheme.typography.titleMedium)
-        Text(
-            "This may take around 30 seconds",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-        )
+        Text("Processing your memory...")
     }
 }
+
+

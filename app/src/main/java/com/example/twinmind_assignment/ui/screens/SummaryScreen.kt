@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.twinmind_assignment.data.TranscriptionCache
+import com.example.twinmind_assignment.ui.navigation.Routes.transcript
 import com.example.twinmind_assignment.viewmodel.SummaryViewModel
 
 @Composable
@@ -15,49 +16,30 @@ fun SummaryScreen(
     viewModel: SummaryViewModel = hiltViewModel(),
     onBack: () -> Unit
 ) {
-    val transcript = TranscriptionCache.get(sessionId)
     val state = viewModel.uiState.collectAsState().value
 
     LaunchedEffect(sessionId) {
-        if (!viewModel.uiState.value.loading && state.summary.isBlank()) {
-            viewModel.generate(transcript)
-        }
+        viewModel.loadOrGenerate(sessionId)
     }
 
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
+    when {
+        state.loading -> {
+            CircularProgressIndicator()
+            Text("Generating summary...")
+        }
 
-        when {
-            state.loading -> {
-                CircularProgressIndicator()
-                Spacer(Modifier.height(16.dp))
-                Text("Generating summary...")
-            }
+        state.error != null -> {
+            Text("Error: ${state.error}")
+        }
 
-            state.error != null -> {
-                Text("Error: ${state.error}", color = MaterialTheme.colorScheme.error)
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(onClick = { viewModel.generate(transcript) }) {
-                    Text("Retry")
-                }
-            }
-
-            else -> {
-                SummaryCard("Title", state.title)
-                Spacer(Modifier.height(12.dp))
-                SummaryCard("Summary", state.summary)
-                Spacer(Modifier.height(12.dp))
-                SummaryListCard("Key Points", state.keyPoints)
-                Spacer(Modifier.height(12.dp))
-                SummaryListCard("Action Items", state.actionItems)
-                Spacer(Modifier.height(24.dp))
-
-                Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
-                    Text("Back")
-                }
-            }
+        else -> {
+            // render summary
         }
     }
 }
+
+
+
 
 @Composable
 fun SummaryCard(title: String, body: String) {

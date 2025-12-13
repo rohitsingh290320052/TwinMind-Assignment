@@ -16,21 +16,21 @@ import com.example.twinmind_assignment.viewmodel.TranscriptViewModel
 @Composable
 fun TranscriptScreen(
     sessionId: Long,
-    textArg: String?,
     viewModel: TranscriptViewModel = hiltViewModel(),
     onContinue: () -> Unit
 ) {
-    val decodedText = textArg?.let { Routes.decode(it) } ?: ""
 
-    LaunchedEffect(decodedText) {
-        viewModel.loadTranscript(decodedText)
-    }
+        LaunchedEffect(sessionId) {
+            viewModel.loadSession(sessionId)
+        }
+
+
 
     val state = viewModel.uiState.collectAsState().value
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
 
-        Card(Modifier.fillMaxWidth()) {
+        Card {
             Column(Modifier.padding(12.dp)) {
                 BasicTextField(
                     value = state.title,
@@ -45,7 +45,6 @@ fun TranscriptScreen(
             Column(Modifier.padding(12.dp)) {
                 Text("Transcript", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(8.dp))
-
                 BasicTextField(
                     value = state.transcript,
                     onValueChange = viewModel::updateTranscript,

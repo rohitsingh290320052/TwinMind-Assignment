@@ -1,6 +1,5 @@
 package com.example.twinmind_assignment.di
 
-
 import com.example.twinmind_assignment.data.AudioRecorder
 import com.example.twinmind_assignment.data.RemoteApi
 import dagger.Module
@@ -15,15 +14,17 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    @Provides @Singleton
-    fun provideRecorder(app: android.app.Application) = AudioRecorder(app)
+    @Provides
+    @Singleton
+    fun provideRecorder(app: android.app.Application) =
+        AudioRecorder(app)
 
-    @Provides @Singleton
-    fun provideRetrofit(): RemoteApi {
-        return Retrofit.Builder()
+    @Provides
+    @Singleton
+    fun provideRemoteApi(): RemoteApi =
+        Retrofit.Builder()
             .baseUrl("https://api.example.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(RemoteApi::class.java)
-    }
 }

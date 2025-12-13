@@ -17,8 +17,8 @@ import com.example.twinmind_assignment.ui.components.PermissionRationale
 
 @Composable
 fun RecorderScreen(
-    viewModel: RecorderViewModel = hiltViewModel(),
-    onStopNavigate: (Long) -> Unit,
+    viewModel: RecorderViewModel,
+    onStopNavigate: () -> Unit,
     onCancel: () -> Unit
 ) {
     PermissionGate(
@@ -29,21 +29,21 @@ fun RecorderScreen(
                 onCancel = onCancel
             )
         }
-    )
-    {
-
+    ) {
         val state = viewModel.uiState.collectAsState().value
 
-        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Surface(modifier = Modifier.fillMaxSize()) {
             Column(
-                modifier = Modifier.fillMaxSize().padding(20.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
 
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Spacer(Modifier.height(8.dp))
-                    Text(text = state.status, style = MaterialTheme.typography.titleMedium)
+                    Text(state.status, style = MaterialTheme.typography.titleMedium)
+
                     Spacer(Modifier.height(24.dp))
 
                     LargeMicButton(
@@ -51,7 +51,7 @@ fun RecorderScreen(
                         onClick = {
                             if (state.isRecording) {
                                 viewModel.stopRecording()
-                                onStopNavigate(0L)   // Navigate immediately to Processing screen
+                                onStopNavigate()
                             } else {
                                 viewModel.startRecording()
                             }
@@ -59,7 +59,7 @@ fun RecorderScreen(
                     )
 
                     Spacer(Modifier.height(16.dp))
-                    Text(text = state.timer, style = MaterialTheme.typography.headlineMedium)
+                    Text(state.timer, style = MaterialTheme.typography.headlineMedium)
                 }
 
                 Row(
@@ -76,3 +76,4 @@ fun RecorderScreen(
         }
     }
 }
+

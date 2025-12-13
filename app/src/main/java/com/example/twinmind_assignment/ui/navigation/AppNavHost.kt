@@ -16,80 +16,115 @@ import com.example.twinmind_assignment.viewmodel.RecorderViewModel
 fun AppNavHost() {
     val nav = rememberNavController()
 
-    NavHost(navController = nav, startDestination = Routes.DASHBOARD) {
+    NavHost(
+        navController = nav,
+        startDestination = Routes.DASHBOARD
+    ) {
 
+        // -----------------------
+        // DASHBOARD
+        // -----------------------
         composable(Routes.DASHBOARD) {
             DashboardScreen(
                 onOpenRecorder = { nav.navigate(Routes.RECORD_FLOW) },
-                onOpenSummary = { sessionId -> nav.navigate(Routes.summary(sessionId)) }
+                onOpenSummary = { sessionId ->
+                    nav.navigate(Routes.summary(sessionId))
+                }
             )
         }
 
-        navigation(route = Routes.RECORD_FLOW, startDestination = Routes.RECORDER) {
+        // -----------------------
+        // RECORD FLOW (Nested)
+        // -----------------------
+        navigation(
+            route = Routes.RECORD_FLOW,
+            startDestination = Routes.RECORDER
+        ) {
 
-
-            // RECORDER SCREEN
-
+            // -----------------------
+            // RECORDER
+            // -----------------------
             composable(Routes.RECORDER) {
 
-                // FIX → remember BackStackEntry
-                val parentEntry = remember { nav.getBackStackEntry(Routes.RECORD_FLOW) }
+                val parentEntry = remember(nav.currentBackStackEntry) {
+                    nav.getBackStackEntry(Routes.RECORD_FLOW)
+                }
                 val vm: RecorderViewModel = hiltViewModel(parentEntry)
 
                 RecorderScreen(
                     viewModel = vm,
-                    onStopNavigate = { nav.navigate(Routes.PROCESSING) },
-                    onCancel = { nav.popBackStack() }
-                )
-            }
-
-
-            // PROCESSING SCREEN
-
-            composable(Routes.PROCESSING) {
-
-
-                val parentEntry = remember { nav.getBackStackEntry(Routes.RECORD_FLOW) }
-                val vm: RecorderViewModel = hiltViewModel(parentEntry)
-
-                ProcessingScreen(
-                    viewModel = vm,
-                    onDone = { sessionId, text ->
-                        nav.navigate(Routes.transcript(sessionId, text))
+                    onStopNavigate = {
+                        nav.navigate(Routes.PROCESSING)
+                    },
+                    onCancel = {
+                        nav.popBackStack()
                     }
                 )
             }
 
 
-            // TRANSCRIPT SCREEN
+            // -----------------------
+            // PROCESSING
+            // -----------------------
+            composable(Routes.PROCESSING) {
 
-            composable(
-                route = Routes.TRANSCRIPT_ROUTE,
-                arguments = listOf(
-                    navArgument("sessionId") { type = NavType.LongType },
-                    navArgument("text") { type = NavType.StringType }
-                )
-            ) { backStack ->
+                val parentEntry = remember(nav.currentBackStackEntry) {
+                    nav.getBackStackEntry(Routes.RECORD_FLOW)
+                }
+                val vm: RecorderViewModel = hiltViewModel(parentEntry)
 
-                val sessionId = backStack.arguments?.getLong("sessionId") ?: -1L
-                val textArg = backStack.arguments?.getString("text")
-
-                TranscriptScreen(
-                    sessionId = sessionId,
-                    textArg = textArg,
-                    onContinue = { nav.navigate(Routes.summary(sessionId)) }
+                ProcessingScreen(
+                    viewModel = vm,
+                    onDone = { sessionId ->
+                        nav.navigate(Routes.transcript(sessionId))
+                    }
                 )
             }
 
 
-            // SUMMARY SCREEN
+            // -----------------------
+            // TRANSCRIPT
+            // -----------------------
+            composable(
+                route = Routes.TRANSCRIPT_ROUTE,
+                arguments = listOf(
+                    navArgument("sessionId") {
+                        type = NavType.LongType
+                    }
+                )
+            ) { backStackEntry ->
 
-            composable(Routes.SUMMARY_ROUTE) { backStack ->
-                val sessionId = backStack.arguments?.getString("sessionId")?.toLongOrNull() ?: -1L
+                val sessionId =
+                    backStackEntry.arguments?.getLong("sessionId") ?: -1L
+
+                TranscriptScreen(
+                    sessionId = sessionId,
+                    onContinue = {
+                        nav.navigate(Routes.summary(sessionId))
+                    }
+                )
+            }
+
+            // -----------------------
+            // SUMMARY
+            // -----------------------
+            composable(
+                route = Routes.SUMMARY_ROUTE,
+                arguments = listOf(
+                    navArgument("sessionId") {
+                        type = NavType.LongType
+                    }
+                )
+            ) { backStackEntry ->
+
+                val sessionId =
+                    backStackEntry.arguments?.getLong("sessionId") ?: -1L
 
                 SummaryScreen(
                     sessionId = sessionId,
-                    onBack = { nav.popBackStack() }
+                    onBack = {
+                        nav.popBackStack()
+                    }
                 )
             }
         }
