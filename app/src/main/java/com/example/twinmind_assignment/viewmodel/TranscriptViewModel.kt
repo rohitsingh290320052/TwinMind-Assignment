@@ -2,7 +2,7 @@ package com.example.twinmind_assignment.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.twinmind_assignment.data.db.MeetingDao
+import com.example.twinmind_assignment.data.RemoteRepository
 import com.example.twinmind_assignment.ui.state.TranscriptUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,20 +12,21 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TranscriptViewModel @Inject constructor(
-    private val dao: MeetingDao
+    private val repository: RemoteRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(TranscriptUiState("", ""))
+    private val _uiState = MutableStateFlow(TranscriptUiState())
     val uiState = _uiState.asStateFlow()
 
     fun loadSession(sessionId: Long) {
         viewModelScope.launch {
-            val transcript = dao.getOrderedChunks(sessionId)
-                .joinToString(" ") { it.text }
+
+            // Full transcript string from Room (correct order)
+            val transcriptText = repository.getFullTranscript(sessionId)
 
             _uiState.value = TranscriptUiState(
                 title = "Meeting $sessionId",
-                transcript = transcript
+                transcript = transcriptText
             )
         }
     }

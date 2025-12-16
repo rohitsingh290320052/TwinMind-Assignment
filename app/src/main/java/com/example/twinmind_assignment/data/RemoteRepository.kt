@@ -1,25 +1,40 @@
 package com.example.twinmind_assignment.data
 
 import android.util.Base64
+import com.example.twinmind_assignment.data.local.MeetingDao
+import com.example.twinmind_assignment.data.local.MeetingEntity
+import com.example.twinmind_assignment.data.local.TranscriptDao
+import com.example.twinmind_assignment.data.local.TranscriptEntity
 import com.example.twinmind_assignment.domain.model.SummaryResult
 import com.example.twinmind_assignment.utils.MimeUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
 import java.io.File
 import javax.inject.Inject
 
 class RemoteRepository @Inject constructor(
-    private val api: GeminiApi
+    private val api: GeminiApi,
+    private val transcriptDao: TranscriptDao,
+    private val meetingDao: MeetingDao
 ) {
 
-    suspend fun transcribeAudio(filePath: String): String = withContext(Dispatchers.IO) {
+    /**
+     * Transcribe a single audio file and persist result in Room.
+     * This keeps Room as the SINGLE SOURCE OF TRUTH.
+     */
+    suspend fun transcribeAndSave(
+        sessionId: Long,
+        filePath: String,
+        chunkIndex: Int = 0
+    ): String = withContext(Dispatchers.IO) {
 
+        // -------- Read audio --------
         val file = File(filePath)
         val audioBytes = file.readBytes()
         val base64Audio = Base64.encodeToString(audioBytes, Base64.NO_WRAP)
         val mimeType = MimeUtils.guess(filePath)
 
+        // -------- Gemini request --------
         val request = GeminiRequest(
             contents = listOf(
                 GeminiContent(
@@ -30,23 +45,65 @@ class RemoteRepository @Inject constructor(
                                 data = base64Audio
                             )
                         ),
-                        GeminiPart(text = "Transcribe this audio in natural English. Remove noise.")
+                        GeminiPart(
+                            text = "Transcribe this audio clearly in natural English. Ignore noise."
+                        )
                     )
                 )
             )
         )
 
-        val response = api.generateContent(GeminiConstants.API_KEY, request)
+        // -------- API call --------
+        val response = api.generateContent(
+            GeminiConstants.API_KEY,
+            request
+        )
 
-        return@withContext response.candidates
-            ?.firstOrNull()
-            ?.content
-            ?.parts
-            ?.firstOrNull()
-            ?.text ?: "Transcription failed"
+        val transcriptionText =
+            response.candidates
+                ?.firstOrNull()
+                ?.content
+                ?.parts
+                ?.firstOrNull()
+                ?.text
+                ?: ""
+
+        // -------- Persist to Room (Transcript) --------
+        // -------- Persist transcript --------
+        transcriptDao.insertTranscript(
+            TranscriptEntity(
+                sessionId = sessionId,
+                chunkIndex = chunkIndex,
+                text = transcriptionText
+            )
+        )
+
+// ✅ SAVE MEETING FOR DASHBOARD
+        meetingDao.insertMeeting(
+            MeetingEntity(
+                sessionId = sessionId,
+                createdAt = System.currentTimeMillis(),
+                preview = transcriptionText.take(80)
+            )
+        )
+
+        return@withContext transcriptionText
+
+
+
+
+        return@withContext transcriptionText
     }
 
+    /**
+     * Fetch FULL transcript in correct order from Room
+     */
+    suspend fun getFullTranscript(sessionId: Long): String = withContext(Dispatchers.IO) {
 
+        transcriptDao.getTranscript(sessionId)
+            .sortedBy { it.chunkIndex }
+            .joinToString(separator = " ") { it.text }
+    }
 
     suspend fun generateSummary(text: String): SummaryResult = withContext(Dispatchers.IO) {
 
@@ -56,17 +113,18 @@ class RemoteRepository @Inject constructor(
                     parts = listOf(
                         GeminiPart(
                             text = """
-                                Summarize the following text into a JSON object:
+                        Summarize the following meeting transcript into JSON ONLY.
 
-                                {
-                                  "title": "short heading",
-                                  "summary": "2–3 sentence summary",
-                                  "keyPoints": ["point 1", "point 2", ...],
-                                  "actionItems": ["task 1", "task 2", ...]
-                                }
+                        Format:
+                        {
+                          "title": "short title",
+                          "summary": "2–3 sentence summary",
+                          "keyPoints": ["point 1", "point 2"],
+                          "actionItems": ["action 1", "action 2"]
+                        }
 
-                                Return **ONLY JSON**, no explanation.
-                            """.trimIndent()
+                        Do NOT add markdown. Do NOT add explanation.
+                        """.trimIndent()
                         ),
                         GeminiPart(text = text)
                     )
@@ -74,31 +132,26 @@ class RemoteRepository @Inject constructor(
             )
         )
 
-        val response = api.generateContent(GeminiConstants.API_KEY, request)
+        val response = api.generateContent(
+            GeminiConstants.API_KEY,
+            request
+        )
 
-        val jsonString = response.candidates
+        val raw = response.candidates
             ?.firstOrNull()
             ?.content
             ?.parts
             ?.firstOrNull()
-            ?.text ?: """{"title":"","summary":"","keyPoints":[],"actionItems":[]}"""
+            ?.text
+            ?: """{"title":"","summary":"","keyPoints":[],"actionItems":[]}"""
 
- 
-        val cleaned = jsonString
+        // Clean ```json fences if Gemini adds them
+        val cleaned = raw
             .replace("```json", "")
             .replace("```", "")
             .trim()
 
-
-
-        val test = """{"title":"hello","summary":"world","keyPoints":["a"],"actionItems":["b"]}"""
-        val parsedTest = Json.decodeFromString<SummaryResult>(test)
-        println("JSON PARSED OK => $parsedTest")
-
-
-
-        return@withContext Json.decodeFromString<SummaryResult>(cleaned)
-
-
+        kotlinx.serialization.json.Json.decodeFromString(cleaned)
     }
+
 }

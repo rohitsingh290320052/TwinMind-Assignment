@@ -5,9 +5,9 @@ import com.example.twinmind_assignment.domain.model.SummaryResult
 import javax.inject.Inject
 
 class SummaryUseCase @Inject constructor(
-    private val repo: RemoteRepository
+    private val repository: RemoteRepository
 ) {
     suspend operator fun invoke(text: String): SummaryResult {
-        return repo.generateSummary(text)
+        return repository.generateSummary(text)
     }
 }

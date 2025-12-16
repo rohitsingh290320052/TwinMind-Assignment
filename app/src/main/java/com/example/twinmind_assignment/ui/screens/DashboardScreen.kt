@@ -1,5 +1,6 @@
 package com.example.twinmind_assignment.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -8,44 +9,66 @@ import androidx.compose.material3.*
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.twinmind_assignment.viewmodel.DashboardViewModel
 import com.example.twinmind_assignment.ui.components.RecordingCard
+import androidx.compose.foundation.lazy.items
+
 
 @OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun DashboardScreen(
-    viewModel: DashboardViewModel = hiltViewModel(),
     onOpenRecorder: () -> Unit,
-    onOpenSummary: (Long) -> Unit
+    onOpenSummary: (Long) -> Unit,
+    viewModel: DashboardViewModel = hiltViewModel()
 ) {
-    val state = viewModel.uiState.collectAsState().value
+    val meetings by viewModel.meetings.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Memories") }
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = onOpenRecorder) {
-                Icon(Icons.Default.Mic, null)
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp)
+    ) {
+
+        Text("Your Meetings", style = MaterialTheme.typography.titleLarge)
+
+        Spacer(Modifier.height(12.dp))
+
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(meetings) { meeting ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onOpenSummary(meeting.sessionId) }
+                ) {
+                    Column(Modifier.padding(12.dp)) {
+                        Text(
+                            text = "Meeting ${meeting.sessionId}",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = meeting.preview,
+                            maxLines = 2,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
             }
         }
-    ) { padding ->
-        LazyColumn(Modifier.fillMaxSize().padding(padding)) {
-            items(state.sessions.size) { i ->
-                val session = state.sessions[i]
-                RecordingCard(
-                    title = session.title,
-                    subtitle = session.subtitle,
-                    time = session.time,
-                    onClick = { onOpenSummary(session.id) }
-                )
-            }
+
+        Spacer(Modifier.weight(1f))
+
+        Button(
+            onClick = onOpenRecorder,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Start Recording")
         }
     }
 }

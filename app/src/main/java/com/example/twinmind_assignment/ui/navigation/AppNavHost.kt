@@ -75,10 +75,11 @@ fun AppNavHost() {
 
                 ProcessingScreen(
                     viewModel = vm,
-                    onDone = { sessionId ->
+                    onDone = { sessionId, text ->   // ← FIXED
                         nav.navigate(Routes.transcript(sessionId))
                     }
                 )
+
             }
 
 

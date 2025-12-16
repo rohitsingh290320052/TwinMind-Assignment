@@ -2,7 +2,6 @@ package com.example.twinmind_assignment.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,11 +12,11 @@ import com.example.twinmind_assignment.viewmodel.RecorderViewModel
 @Composable
 fun ProcessingScreen(
     viewModel: RecorderViewModel,
-    onDone: (Long) -> Unit
+    onDone: (Long, String) -> Unit
 ) {
     LaunchedEffect(Unit) {
-        viewModel.processingDone.collect { sessionId ->
-            onDone(sessionId)
+        viewModel.processingDone.collect { (sessionId, text) ->
+            onDone(sessionId, text)
         }
     }
 
@@ -28,8 +27,7 @@ fun ProcessingScreen(
     ) {
         CircularProgressIndicator()
         Spacer(Modifier.height(16.dp))
-        Text("Processing your memory...")
+        Text("Processing your memory…")
+        Text("This may take around 30 seconds")
     }
 }
-
-

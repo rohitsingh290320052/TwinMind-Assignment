@@ -2,8 +2,7 @@ package com.example.twinmind_assignment.di
 
 import android.app.Application
 import androidx.room.Room
-import com.example.twinmind_assignment.data.db.AppDatabase
-import com.example.twinmind_assignment.data.db.MeetingDao
+import com.example.twinmind_assignment.data.local.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,9 +16,15 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(app: Application): AppDatabase =
-        Room.databaseBuilder(app, AppDatabase::class.java, "twinmind.db")
-            .build()
+        Room.databaseBuilder(
+            app,
+            AppDatabase::class.java,
+            "twinmind_db"
+        ).build()
 
     @Provides
-    fun provideMeetingDao(db: AppDatabase): MeetingDao = db.meetingDao()
+    fun provideMeetingDao(db: AppDatabase) = db.meetingDao()
+
+    @Provides
+    fun provideTranscriptDao(db: AppDatabase) = db.transcriptDao()
 }
